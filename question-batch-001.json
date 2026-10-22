@@ -1,0 +1,602 @@
+[
+  {
+    "category": "vocab",
+    "subtype": "漢字の読み",
+    "stem": "【寡黙】の読み方として最も適切なものを選びなさい。",
+    "choices": [
+      "かもく",
+      "かぼく",
+      "かまく",
+      "かみゃく"
+    ],
+    "answer_index": 0,
+    "explanation": "寡黙（かもく）：沉默寡言。",
+    "difficulty": 3,
+    "status": "draft"
+  },
+  {
+    "category": "vocab",
+    "subtype": "漢字の読み",
+    "stem": "【踏襲】の読み方として最も適切なものを選びなさい。",
+    "choices": [
+      "とうしゅう",
+      "ふしゅう",
+      "とうせき",
+      "ふせき"
+    ],
+    "answer_index": 0,
+    "explanation": "踏襲（とうしゅう）：沿袭既有方式。",
+    "difficulty": 3,
+    "status": "draft"
+  },
+  {
+    "category": "vocab",
+    "subtype": "漢字の読み",
+    "stem": "【示唆】の読み方として最も適切なものを選びなさい。",
+    "choices": [
+      "しさ",
+      "じさ",
+      "しさく",
+      "じさく"
+    ],
+    "answer_index": 0,
+    "explanation": "示唆（しさ）：暗示、启发。",
+    "difficulty": 3,
+    "status": "draft"
+  },
+  {
+    "category": "vocab",
+    "subtype": "漢字の読み",
+    "stem": "【払拭】の読み方として最も適切なものを選びなさい。",
+    "choices": [
+      "ふっしょく",
+      "はっしょく",
+      "ふっせつ",
+      "はっせつ"
+    ],
+    "answer_index": 0,
+    "explanation": "払拭（ふっしょく）：消除不安或疑虑。",
+    "difficulty": 3,
+    "status": "draft"
+  },
+  {
+    "category": "vocab",
+    "subtype": "漢字の読み",
+    "stem": "【脆弱】の読み方として最も適切なものを選びなさい。",
+    "choices": [
+      "ぜいじゃく",
+      "きじゃく",
+      "さいじゃく",
+      "ぜいよわ"
+    ],
+    "answer_index": 0,
+    "explanation": "脆弱（ぜいじゃく）：脆弱、不牢固。",
+    "difficulty": 3,
+    "status": "draft"
+  },
+  {
+    "category": "vocab",
+    "subtype": "漢字の読み",
+    "stem": "【軋轢】の読み方として最も適切なものを選びなさい。",
+    "choices": [
+      "あつれき",
+      "あつりょく",
+      "かつれき",
+      "あつれつ"
+    ],
+    "answer_index": 0,
+    "explanation": "軋轢（あつれき）：摩擦、冲突。",
+    "difficulty": 3,
+    "status": "draft"
+  },
+  {
+    "category": "vocab",
+    "subtype": "漢字の読み",
+    "stem": "【顕著】の読み方として最も適切なものを選びなさい。",
+    "choices": [
+      "けんちょ",
+      "げんちょ",
+      "けんしょ",
+      "げんしょ"
+    ],
+    "answer_index": 0,
+    "explanation": "顕著（けんちょ）：显著、明显。",
+    "difficulty": 3,
+    "status": "draft"
+  },
+  {
+    "category": "vocab",
+    "subtype": "漢字の読み",
+    "stem": "【逸脱】の読み方として最も適切なものを選びなさい。",
+    "choices": [
+      "いつだつ",
+      "いちだつ",
+      "いつたつ",
+      "いちたつ"
+    ],
+    "answer_index": 0,
+    "explanation": "逸脱（いつだつ）：偏离规范或范围。",
+    "difficulty": 3,
+    "status": "draft"
+  },
+  {
+    "category": "vocab",
+    "subtype": "漢字の読み",
+    "stem": "【憂慮】の読み方として最も適切なものを選びなさい。",
+    "choices": [
+      "ゆうりょ",
+      "ゆりょ",
+      "うりょ",
+      "ゆうろ"
+    ],
+    "answer_index": 0,
+    "explanation": "憂慮（ゆうりょ）：忧虑。",
+    "difficulty": 3,
+    "status": "draft"
+  },
+  {
+    "category": "vocab",
+    "subtype": "漢字の読み",
+    "stem": "【緻密】の読み方として最も適切なものを選びなさい。",
+    "choices": [
+      "ちみつ",
+      "じみつ",
+      "ちひつ",
+      "しみつ"
+    ],
+    "answer_index": 0,
+    "explanation": "緻密（ちみつ）：细致、缜密。",
+    "difficulty": 3,
+    "status": "draft"
+  },
+  {
+    "category": "vocab",
+    "subtype": "漢字の読み",
+    "stem": "【該当】の読み方として最も適切なものを選びなさい。",
+    "choices": [
+      "がいとう",
+      "かいとう",
+      "がいどう",
+      "かいどう"
+    ],
+    "answer_index": 0,
+    "explanation": "該当（がいとう）：符合、属于。",
+    "difficulty": 3,
+    "status": "draft"
+  },
+  {
+    "category": "vocab",
+    "subtype": "漢字の読み",
+    "stem": "【錯綜】の読み方として最も適切なものを選びなさい。",
+    "choices": [
+      "さくそう",
+      "さっそう",
+      "さくぞう",
+      "さっぞう"
+    ],
+    "answer_index": 0,
+    "explanation": "錯綜（さくそう）：错综复杂。",
+    "difficulty": 3,
+    "status": "draft"
+  },
+  {
+    "category": "vocab",
+    "subtype": "漢字の読み",
+    "stem": "【是正】の読み方として最も適切なものを選びなさい。",
+    "choices": [
+      "ぜせい",
+      "しせい",
+      "ぜしょう",
+      "ししょう"
+    ],
+    "answer_index": 0,
+    "explanation": "是正（ぜせい）：纠正、改正。",
+    "difficulty": 3,
+    "status": "draft"
+  },
+  {
+    "category": "vocab",
+    "subtype": "漢字の読み",
+    "stem": "【懐柔】の読み方として最も適切なものを選びなさい。",
+    "choices": [
+      "かいじゅう",
+      "かいにゅう",
+      "かいゆう",
+      "かいじょう"
+    ],
+    "answer_index": 0,
+    "explanation": "懐柔（かいじゅう）：笼络、安抚。",
+    "difficulty": 3,
+    "status": "draft"
+  },
+  {
+    "category": "vocab",
+    "subtype": "漢字の読み",
+    "stem": "【斡旋】の読み方として最も適切なものを選びなさい。",
+    "choices": [
+      "あっせん",
+      "あつせん",
+      "あっせい",
+      "あつせい"
+    ],
+    "answer_index": 0,
+    "explanation": "斡旋（あっせん）：斡旋、介绍安排。",
+    "difficulty": 3,
+    "status": "draft"
+  },
+  {
+    "category": "vocab",
+    "subtype": "漢字の読み",
+    "stem": "【概ね】の読み方として最も適切なものを選びなさい。",
+    "choices": [
+      "おおむね",
+      "がいね",
+      "おおね",
+      "おむね"
+    ],
+    "answer_index": 0,
+    "explanation": "概ね（おおむね）：大致、总体上。",
+    "difficulty": 3,
+    "status": "draft"
+  },
+  {
+    "category": "vocab",
+    "subtype": "漢字の読み",
+    "stem": "【危惧】の読み方として最も適切なものを選びなさい。",
+    "choices": [
+      "きぐ",
+      "きく",
+      "ぎぐ",
+      "ぎく"
+    ],
+    "answer_index": 0,
+    "explanation": "危惧（きぐ）：担忧、顾虑。",
+    "difficulty": 3,
+    "status": "draft"
+  },
+  {
+    "category": "vocab",
+    "subtype": "漢字の読み",
+    "stem": "【黙認】の読み方として最も適切なものを選びなさい。",
+    "choices": [
+      "もくにん",
+      "ぼくにん",
+      "もくじん",
+      "ぼくじん"
+    ],
+    "answer_index": 0,
+    "explanation": "黙認（もくにん）：默许。",
+    "difficulty": 3,
+    "status": "draft"
+  },
+  {
+    "category": "vocab",
+    "subtype": "漢字の読み",
+    "stem": "【露呈】の読み方として最も適切なものを選びなさい。",
+    "choices": [
+      "ろてい",
+      "ろじょう",
+      "ろせい",
+      "ろてん"
+    ],
+    "answer_index": 0,
+    "explanation": "露呈（ろてい）：暴露、显露。",
+    "difficulty": 3,
+    "status": "draft"
+  },
+  {
+    "category": "vocab",
+    "subtype": "漢字の読み",
+    "stem": "【精査】の読み方として最も適切なものを選びなさい。",
+    "choices": [
+      "せいさ",
+      "しょうさ",
+      "せいしゃ",
+      "しょうしゃ"
+    ],
+    "answer_index": 0,
+    "explanation": "精査（せいさ）：仔细审查。",
+    "difficulty": 3,
+    "status": "draft"
+  },
+  {
+    "category": "grammar",
+    "subtype": "文法形式の判断",
+    "stem": "結果を急ぐ（　）、まず原因を十分に調べるべきだ。",
+    "choices": [
+      "あまり",
+      "よりも",
+      "かたわら",
+      "につれて"
+    ],
+    "answer_index": 1,
+    "explanation": "「AよりもB」表示与其A不如B。",
+    "difficulty": 3,
+    "status": "draft"
+  },
+  {
+    "category": "grammar",
+    "subtype": "文法形式の判断",
+    "stem": "彼は経験が豊富な（　）、判断を誤ることもある。",
+    "choices": [
+      "だけに",
+      "とはいえ",
+      "ばかりに",
+      "どころか"
+    ],
+    "answer_index": 1,
+    "explanation": "「〜とはいえ」表示虽说如此，但仍有例外。",
+    "difficulty": 3,
+    "status": "draft"
+  },
+  {
+    "category": "grammar",
+    "subtype": "文法形式の判断",
+    "stem": "この薬は、医師の指示（　）服用してください。",
+    "choices": [
+      "に即して",
+      "に反して",
+      "を皮切りに",
+      "に先立って"
+    ],
+    "answer_index": 0,
+    "explanation": "「〜に即して」表示按照、依据。",
+    "difficulty": 3,
+    "status": "draft"
+  },
+  {
+    "category": "grammar",
+    "subtype": "文法形式の判断",
+    "stem": "担当者の説明は曖昧で、納得（　）。",
+    "choices": [
+      "するに足る",
+      "しようがない",
+      "せずにはおかない",
+      "するに越したことはない"
+    ],
+    "answer_index": 1,
+    "explanation": "「〜ようがない」表示没有办法做到。",
+    "difficulty": 3,
+    "status": "draft"
+  },
+  {
+    "category": "grammar",
+    "subtype": "文法形式の判断",
+    "stem": "新制度の導入（　）、社内で研修会が開かれた。",
+    "choices": [
+      "に先立ち",
+      "にひきかえ",
+      "をものともせず",
+      "とあって"
+    ],
+    "answer_index": 0,
+    "explanation": "「〜に先立ち」表示在某事之前。",
+    "difficulty": 3,
+    "status": "draft"
+  },
+  {
+    "category": "grammar",
+    "subtype": "文法形式の判断",
+    "stem": "本人の努力（　）、周囲の支援も成功に欠かせなかった。",
+    "choices": [
+      "をよそに",
+      "もさることながら",
+      "にかこつけて",
+      "にひきかえ"
+    ],
+    "answer_index": 1,
+    "explanation": "「〜もさることながら」表示固然重要，此外也重要。",
+    "difficulty": 3,
+    "status": "draft"
+  },
+  {
+    "category": "grammar",
+    "subtype": "文法形式の判断",
+    "stem": "この規則は、例外を認めない（　）厳格なものだ。",
+    "choices": [
+      "ほど",
+      "ばかり",
+      "から",
+      "まで"
+    ],
+    "answer_index": 0,
+    "explanation": "「〜ほど」在这里表示程度。",
+    "difficulty": 3,
+    "status": "draft"
+  },
+  {
+    "category": "grammar",
+    "subtype": "文法形式の判断",
+    "stem": "長年の研究の末、ようやく実用化（　）。",
+    "choices": [
+      "するに至った",
+      "するきらいがある",
+      "せずにはすまない",
+      "したそばから"
+    ],
+    "answer_index": 0,
+    "explanation": "「〜に至る」表示经过过程终于达到某结果。",
+    "difficulty": 3,
+    "status": "draft"
+  },
+  {
+    "category": "grammar",
+    "subtype": "文法形式の判断",
+    "stem": "部長は部下の失敗を責める（　）、改善策を一緒に考えた。",
+    "choices": [
+      "どころか",
+      "かたわら",
+      "あげく",
+      "ついでに"
+    ],
+    "answer_index": 0,
+    "explanation": "「〜どころか」表示非但没有，反而。",
+    "difficulty": 3,
+    "status": "draft"
+  },
+  {
+    "category": "grammar",
+    "subtype": "文法形式の判断",
+    "stem": "何度説明した（　）、彼は考えを変えなかった。",
+    "choices": [
+      "ところで",
+      "ものなら",
+      "かと思えば",
+      "ばかりに"
+    ],
+    "answer_index": 0,
+    "explanation": "「〜たところで」表示即使做了也不会改变结果。",
+    "difficulty": 3,
+    "status": "draft"
+  },
+  {
+    "category": "grammar",
+    "subtype": "文法形式の判断",
+    "stem": "彼女は忙しい（　）、毎日欠かさず日記を書いている。",
+    "choices": [
+      "ながらも",
+      "あまり",
+      "ばかりに",
+      "に際して"
+    ],
+    "answer_index": 0,
+    "explanation": "「〜ながらも」表示虽然……但是……。",
+    "difficulty": 3,
+    "status": "draft"
+  },
+  {
+    "category": "grammar",
+    "subtype": "文法形式の判断",
+    "stem": "証拠がない以上、推測だけで断定する（　）。",
+    "choices": [
+      "わけにはいかない",
+      "に越したことはない",
+      "までもない",
+      "にほかならない"
+    ],
+    "answer_index": 0,
+    "explanation": "「〜わけにはいかない」表示由于道理或责任而不能做。",
+    "difficulty": 3,
+    "status": "draft"
+  },
+  {
+    "category": "grammar",
+    "subtype": "文法形式の判断",
+    "stem": "予算が削減された以上、計画を見直さ（　）。",
+    "choices": [
+      "ざるを得ない",
+      "ないこともない",
+      "ずにはおかない",
+      "ないではすまない"
+    ],
+    "answer_index": 0,
+    "explanation": "「〜ざるを得ない」表示不得不。",
+    "difficulty": 3,
+    "status": "draft"
+  },
+  {
+    "category": "grammar",
+    "subtype": "文法形式の判断",
+    "stem": "彼の話は大げさで、にわかには信じ（　）。",
+    "choices": [
+      "がたい",
+      "かねない",
+      "そびれた",
+      "かけた"
+    ],
+    "answer_index": 0,
+    "explanation": "「〜がたい」表示心理上难以做到。",
+    "difficulty": 3,
+    "status": "draft"
+  },
+  {
+    "category": "grammar",
+    "subtype": "文法形式の判断",
+    "stem": "この作品は世代（　）、幅広い人々に親しまれている。",
+    "choices": [
+      "を問わず",
+      "にかかわって",
+      "をめぐり",
+      "にひきかえ"
+    ],
+    "answer_index": 0,
+    "explanation": "「〜を問わず」表示不论、不区分。",
+    "difficulty": 3,
+    "status": "draft"
+  },
+  {
+    "category": "reading",
+    "subtype": "内容理解（短文）",
+    "stem": "ある町では、図書館の開館時間を延ばしたが、利用者数はほとんど増えなかった。一方、駅前に小さな返却窓口を設けると、貸出冊数が増加した。担当者は、利用時間の長さより、日常の移動経路にサービスがあることが重要なのではないかと考えている。\n\n【問題】担当者が重視しているのは何か。",
+    "choices": [
+      "図書館の建物の広さ",
+      "利用者の生活動線に合う利便性",
+      "開館時間のさらなる延長",
+      "蔵書数を減らすこと"
+    ],
+    "answer_index": 1,
+    "explanation": "开馆时间延长无明显效果，而车站归还窗口有效，强调生活动线上的便利。",
+    "difficulty": 3,
+    "status": "draft"
+  },
+  {
+    "category": "reading",
+    "subtype": "内容理解（短文）",
+    "stem": "新しい道具は、使い方を覚えるまで時間がかかる。しかし、導入直後の作業速度だけで効果を判断すると、長期的な利点を見落とすことがある。とはいえ、将来便利になるという理由だけで、現在の負担を無視してよいわけではない。\n\n【問題】筆者の考えに最も近いものはどれか。",
+    "choices": [
+      "導入直後の速度だけで評価すべきだ",
+      "長期的利益だけを重視すべきだ",
+      "短期的負担と長期的効果の双方を考えるべきだ",
+      "新しい道具は導入しないほうがよい"
+    ],
+    "answer_index": 2,
+    "explanation": "作者主张兼顾短期负担与长期收益。",
+    "difficulty": 3,
+    "status": "draft"
+  },
+  {
+    "category": "reading",
+    "subtype": "内容理解（短文）",
+    "stem": "会議で全員が賛成したからといって、意見が十分に検討されたとは限らない。反対意見を述べにくい雰囲気では、沈黙が賛成と受け取られることもある。議論の質を高めるには、異なる見方を安心して示せる環境が必要だ。\n\n【問題】筆者が問題視していることは何か。",
+    "choices": [
+      "会議に参加する人数が多いこと",
+      "反対意見が出にくく、合意が形だけになること",
+      "結論を出すまでに時間がかかること",
+      "賛成意見が複数あること"
+    ],
+    "answer_index": 1,
+    "explanation": "沉默可能被误当赞同，导致表面一致。",
+    "difficulty": 3,
+    "status": "draft"
+  },
+  {
+    "category": "reading",
+    "subtype": "内容理解（短文）",
+    "stem": "地域の祭りを続けるため、主催者は準備作業を簡素化した。伝統が失われるとの声もあったが、負担を減らしたことで若い世代の参加が増えた。主催者は、形式を一切変えないことと、祭りの意味を守ることは同じではないと話す。\n\n【問題】主催者の考えとして適切なのはどれか。",
+    "choices": [
+      "伝統を守るには形式を固定すべきだ",
+      "若者の参加は祭りの意味を弱める",
+      "祭りの継続には負担の調整も必要だ",
+      "準備作業は複雑なほどよい"
+    ],
+    "answer_index": 2,
+    "explanation": "保留意义不等于所有形式不变，减负帮助持续。",
+    "difficulty": 3,
+    "status": "draft"
+  },
+  {
+    "category": "reading",
+    "subtype": "内容理解（短文）",
+    "stem": "ある企業では、社員の提案数を評価指標に加えたところ、提案は増えたが、実行可能な案の割合は下がった。そこで提案数だけでなく、課題の分析や実施後の振り返りも評価するようにした。\n\n【問題】企業が評価方法を変更した理由は何か。",
+    "choices": [
+      "提案を一切受け付けないため",
+      "提案数の増加だけでは質を測れないため",
+      "社員数を減らすため",
+      "実行までの時間を必ず短縮するため"
+    ],
+    "answer_index": 1,
+    "explanation": "只看数量导致质量下降，因此引入过程与复盘评价。",
+    "difficulty": 3,
+    "status": "draft"
+  }
+]
