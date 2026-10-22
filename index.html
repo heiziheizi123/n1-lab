@@ -30,7 +30,7 @@ const Q=[
 ['reading','読解','会議では発言の多さが積極性の表れとみなされがちだ。しかし、他者の意見を丁寧に聞き、論点を整理する人がいるからこそ、議論が前に進む場合もある。目立つ行動だけを評価すると、こうした貢献が見落とされる。','筆者が問題視していることは何か。','目立たない貢献が評価されにくいこと','会議で発言する人が多すぎること','論点を整理する人が不足していること','発言を禁止する会議が増えていること','目立たない貢献が評価されにくいこと','作者批评仅以显眼表现评价贡献的方式。'],
 ['reading','読解','ある企業は在宅勤務を導入した後、社員同士の偶然の会話が減ったことに気づいた。業務上の連絡は問題なく行われていたが、部署を越えた相談が生まれにくくなったという。そこで、参加を強制しない短い交流時間を設けることにした。','企業が交流時間を設けた目的は何か。','部署を越えた自発的な交流を促すため','業務連絡の回数を減らすため','社員の勤務時間を延ばすため','在宅勤務を全面的に廃止するため','部署を越えた自発的な交流を促すため','“業務連絡は問題なく”排除日常沟通障碍，真正缺失的是跨部门偶发交流。']
 ];
-const options=q=>q[0]==='reading'?q.slice(4,8):q.slice(3,7);const answer=q=>q[0]==='reading'?q[8]:q[7];const explanation=q=>q[0]==='reading'?q[9]:q[8];const dbKey='n1lab-v01';const initial={name:'学习者',history:[],wrong:[],saved:[],sessions:[],examHistory:[],settings:{}};let state;try{state={...initial,...JSON.parse(localStorage.getItem(dbKey)||'{}')}}catch{state=structuredClone(initial)};let page='home',session=null,timer=null;const $=id=>document.getElementById(id);const save=()=>localStorage.setItem(dbKey,JSON.stringify(state));const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));const date=()=>new Date().toLocaleDateString('en-CA');const today=()=>state.history.filter(x=>x.day===date());const fmt=n=>`${Math.floor(n/60)}分${n%60}秒`;const answered=()=>state.history.length;const correct=()=>state.history.filter(x=>x.ok).length;const unique=a=>[...new Set(a)];const navs=[['home','⌂','首页'],['practice','▦','题库练习'],['exam','◷','模拟考试'],['wrong','✎','错题本'],['stats','▤','学习统计'],['settings','⚙','设置']];
+const options=q=>q[0]==='reading'?q.slice(4,8):q.slice(3,7);const answer=q=>q[0]==='reading'?q[8]:q[7];const explanation=q=>q[0]==='reading'?q[9]:q[8];const dbKey='n1lab-v01';const initial={name:'学习者',history:[],wrong:[],saved:[],sessions:[],examHistory:[],settings:{}};let state;try{state={...initial,...JSON.parse(localStorage.getItem(dbKey)||'{}')}}catch{state=structuredClone(initial)};let page='home',session=null,timer=null;const $=id=>document.getElementById(id);const save=()=>{localStorage.setItem(dbKey,JSON.stringify(state));window.n1CloudSave?.()};const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));const date=()=>new Date().toLocaleDateString('en-CA');const today=()=>state.history.filter(x=>x.day===date());const fmt=n=>`${Math.floor(n/60)}分${n%60}秒`;const answered=()=>state.history.length;const correct=()=>state.history.filter(x=>x.ok).length;const unique=a=>[...new Set(a)];const navs=[['home','⌂','首页'],['practice','▦','题库练习'],['exam','◷','模拟考试'],['wrong','✎','错题本'],['stats','▤','学习统计'],['settings','⚙','设置']];
 function menu(){ $('nav').innerHTML=navs.map(([p,i,t])=>`<button class="nav ${page===p?'active':''}" onclick="go('${p}')">${i} <span>${t}</span></button>`).join('')}
 function shell(title,sub,body){return `<div class="top"><div><div class="eyebrow">N1 LAB / ${esc(title.toUpperCase())}</div><h1>${esc(title)}</h1><div class="sub">${sub}</div></div><div class="pill">◉ 本地演示版</div></div>${body}<div class="footer">本网站为独立原创练习工具，非 JLPT 官方产品。当前题目为演示题，难度及分数未经标定。</div>`}
 function go(p){if(session&&session.mode==='exam'&&p!=='exam'&&!confirm('离开将结束当前模拟考试，确定吗？'))return;if(session&&p!=='practice'&&p!=='exam'){clearInterval(timer);session=null}page=p;menu();render();window.scrollTo(0,0)}
@@ -48,4 +48,31 @@ function finishExam(){let s=session;if(!s||s.mode!=='exam')return;clearInterval(
 function exportData(){let blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='n1-lab-backup.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),2000)}
 function importData(e){let f=e.target.files[0];if(!f)return;let reader=new FileReader();reader.onload=()=>{try{let x=JSON.parse(reader.result);if(!Array.isArray(x.history)||!Array.isArray(x.wrong)||!Array.isArray(x.examHistory))throw Error('格式不匹配');if(!confirm('导入将覆盖当前本地学习记录，继续吗？'))return;state={...initial,...x};save();render();alert('导入成功')}catch(err){alert('导入失败：'+err.message)}};reader.readAsText(f)}
 menu();render();
+</script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<style>#n1-auth{position:fixed;inset:0;background:#f5f7fb;z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px}#n1-auth .box{background:white;padding:30px;border-radius:18px;width:min(420px,100%);box-shadow:0 10px 40px #14203922}#n1-auth input{width:100%;padding:12px;margin:8px 0;border:1px solid #dce3ed;border-radius:9px}#n1-auth button{background:#4969e9;color:white;border:0;border-radius:9px;padding:12px;width:100%}#n1-status{position:fixed;bottom:12px;right:12px;background:#142039;color:white;padding:10px;border-radius:12px;z-index:500;font-size:12px}</style>
+<div id="n1-auth"><div class="box"><h2>N1 LAB · 登录</h2><p>仅限管理员创建的账号使用。</p><form id="n1-form"><input id="n1-email" type="email" required placeholder="邮箱"><input id="n1-pass" type="password" required placeholder="密码"><button>登录</button></form><p id="n1-error" style="color:#c45b62"></p></div></div>
+<div id="n1-status" hidden><span id="n1-sync">已登录</span> · <a href="#" id="n1-logout" style="color:#cad6ff">退出</a></div>
+<script>
+(()=>{
+const client=window.supabase?.createClient('https://dhizmrxehdkdfyrgivrt.supabase.co','sb_publishable_c7qY1Lc4ZCUWlEG-cz8VXQ_T4SE1xgP');
+const auth=document.getElementById('n1-auth'),status=document.getElementById('n1-status'),sync=document.getElementById('n1-sync');
+let uid=null,delay=null;
+if(!client){document.getElementById('n1-error').textContent='连接组件加载失败，请刷新重试';return}
+async function enter(user){
+uid=user.id;
+const {data,error}=await client.from('study_data').select('payload').eq('user_id',uid).maybeSingle();
+if(error){document.getElementById('n1-error').textContent='数据库尚未配置：请先运行 supabase-setup.sql';return}
+if(data?.payload && Array.isArray(data.payload.history)){state={...initial,...data.payload}}
+else{state=structuredClone(initial)}
+localStorage.setItem(dbKey,JSON.stringify(state));auth.style.display='none';status.hidden=false;sync.textContent='已登录 · 云端就绪';render();
+}
+window.n1CloudSave=()=>{if(!uid)return;clearTimeout(delay);delay=setTimeout(async()=>{
+sync.textContent='同步中…';
+const {error}=await client.from('study_data').upsert({user_id:uid,payload:state,updated_at:new Date().toISOString()});
+sync.textContent=error?'同步失败':'已同步';
+},900)};
+document.getElementById('n1-form').onsubmit=async e=>{e.preventDefault();const {data,error}=await client.auth.signInWithPassword({email:document.getElementById('n1-email').value,password:document.getElementById('n1-pass').value});document.getElementById('n1-error').textContent=error?.message||'';if(data?.user)await enter(data.user)};
+document.getElementById('n1-logout').onclick=async e=>{e.preventDefault();await client.auth.signOut();localStorage.removeItem(dbKey);location.reload()};
+client.auth.getUser().then(({data})=>{if(data?.user)enter(data.user)}).catch(()=>{document.getElementById('n1-error').textContent='网络连接失败'});
+})();
 </script></body></html>
