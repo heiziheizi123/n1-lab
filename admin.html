@@ -41,7 +41,7 @@ async function approveAllDrafts(){
  const eligible=drafts.filter(r=>!duplicateIds.has(r.id));
  const skipped=drafts.length-eligible.length;
  if(!eligible.length){msg('所有待审核题都涉及疑似重复，请先检查或清理重复题。',true);return}
- if(!confirm('准备一次通过 '+eligible.length+' 道待审核题。\\n另有 '+skipped+' 道疑似重复题将保留待审核。\\n请确认题目答案已人工核对；通过后学生即可看到。继续吗？'))return;
+ if(!confirm('准备一次通过 '+eligible.length+' 道待审核题。\n另有 '+skipped+' 道疑似重复题将保留待审核。\n请确认题目答案已人工核对；通过后学生即可看到。继续吗？'))return;
  let done=0;
  for(let i=0;i<eligible.length;i+=100){
   const ids=eligible.slice(i,i+100).map(r=>r.id);
@@ -90,8 +90,8 @@ async function importJSON(){try{
  const items=parsed.map(x=>clean({...x,status:'draft'}));
  // Read the latest database snapshot, not only the last displayed list.
  const existing=[];for(let from=0;;from+=500){const {data,error}=await db.from('questions').select('id,category,stem').order('id',{ascending:true}).range(from,from+499);if(error)throw Error('去重检查读取题库失败：'+error.message);existing.push(...(data||[]));if(!data||data.length<500)break}
- const seen=new Set(existing.map(duplicateKey)),unique=[];let skippedExisting=0,skippedFile=0;
- for(const item of items){const key=duplicateKey(item);if(seen.has(key)){if(existing.some(r=>duplicateKey(r)===key))skippedExisting++;else skippedFile++;continue}seen.add(key);unique.push(item)}
+ const existingKeys=new Set(existing.map(duplicateKey)),seen=new Set(existingKeys),unique=[];let skippedExisting=0,skippedFile=0;
+ for(const item of items){const key=duplicateKey(item);if(seen.has(key)){if(existingKeys.has(key))skippedExisting++;else skippedFile++;continue}seen.add(key);unique.push(item)}
  if(!unique.length){msg('没有可导入的新题目：与题库重复 '+skippedExisting+' 道，文件内部重复 '+skippedFile+' 道。',true);return}
  if(!confirm('共识别 '+items.length+' 道；去重后导入 '+unique.length+' 道草稿。\n与现有题库重复 '+skippedExisting+' 道，文件内部重复 '+skippedFile+' 道。\n确认导入？'))return;
  let count=0;for(let i=0;i<unique.length;i+=100){const {error}=await db.from('questions').insert(unique.slice(i,i+100));if(error)throw Error('已导入 '+count+' 道，随后失败：'+error.message);count+=Math.min(100,unique.length-i)}
