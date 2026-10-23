@@ -38,7 +38,13 @@ function addCloudQuestions(rows){
   const id=-Number(row.id);
   if(!Number.isSafeInteger(id)||id>=0||cloudQuestionIds.has(id))continue;
   if(!Array.isArray(row.choices)||row.choices.length!==4||!Number.isInteger(row.answer_index)||row.answer_index<0||row.answer_index>3)continue;
-  const q=row.category==='reading'?[row.category,row.subtype||'読解',row.stem,'',...row.choices,row.choices[row.answer_index],row.explanation||'']:[row.category,row.subtype||row.category,row.stem,...row.choices,row.choices[row.answer_index],row.explanation||''];
+  let passage=row.stem,readingQuestion='';
+  if(row.category==='reading'){
+   const match=String(row.stem).match(/(?:^|\\n)\\s*(?:【問題】|【設問】|問題[:：]|設問[:：])\\s*/);
+   if(match){const pos=match.index+match[0].length;passage=row.stem.slice(0,match.index).trim();readingQuestion=row.stem.slice(pos).trim()}
+   else readingQuestion='次の文章を読んで、最も適切なものを選びなさい。';
+  }
+  const q=row.category==='reading'?[row.category,row.subtype||'読解',passage,readingQuestion,...row.choices,row.choices[row.answer_index],row.explanation||'']:[row.category,row.subtype||row.category,row.stem,...row.choices,row.choices[row.answer_index],row.explanation||''];
   Q[id]=q;cloudQuestionIds.add(id);
  }
 }
