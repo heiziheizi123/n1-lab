@@ -15,7 +15,7 @@ function msg(s,bad=false){$('notice').textContent=s;$('notice').className='statu
 for(let i=0;i<4;i++){$('choices').insertAdjacentHTML('beforeend','<div><label>选项 '+String.fromCharCode(65+i)+'</label><input id="choice'+i+'"></div>')}
 function clean(x){if(!x||!['vocab','grammar','reading'].includes(x.category)||typeof x.stem!=='string'||!x.stem.trim()||!Array.isArray(x.choices)||x.choices.length!==4||x.choices.some(v=>typeof v!=='string'||!v.trim())||!Number.isInteger(x.answer_index)||x.answer_index<0||x.answer_index>3)throw Error('题目格式不正确：请检查类别、题干、四个选项及答案编号');return {category:x.category,subtype:String(x.subtype||'general'),stem:x.stem.trim(),choices:x.choices,answer_index:x.answer_index,explanation:String(x.explanation||''),difficulty:Math.max(1,Math.min(5,Number(x.difficulty)||3)),status:x.status||'draft'}}
 // Ignore whitespace and common punctuation differences, while keeping kana/kanji intact.
-function normalizeStem(s){return String(s||'').normalize('NFKC').toLowerCase().replace(/[\\s\\u3000、。，．,.!?！？「」『』【】（）()：:；;・]/g,'')}
+function normalizeStem(s){return String(s||'').normalize('NFKC').toLowerCase().replace(/[\s\u3000、。，．,.!?！？「」『』【】（）()：:；;・]/g,'')}
 function duplicateKey(q){return q.category+'|'+normalizeStem(q.stem)}
 function duplicateOf(q,existing){const key=duplicateKey(q);return existing.find(r=>duplicateKey(r)===key)}
 async function load(){msg('正在加载题库…');let all=[];for(let from=0;;from+=1000){let {data,error}=await db.from('questions').select('*').order('id',{ascending:false}).range(from,from+999);if(error){msg('读取失败：'+error.message,true);return}all.push(...data);if(data.length<1000)break}rows=all;msg('已加载 '+rows.length+' 道题');draw()}
@@ -49,7 +49,7 @@ async function importJSON(){try{
  const seen=new Set(existing.map(duplicateKey)),unique=[];let skippedExisting=0,skippedFile=0;
  for(const item of items){const key=duplicateKey(item);if(seen.has(key)){if(existing.some(r=>duplicateKey(r)===key))skippedExisting++;else skippedFile++;continue}seen.add(key);unique.push(item)}
  if(!unique.length){msg('没有可导入的新题目：与题库重复 '+skippedExisting+' 道，文件内部重复 '+skippedFile+' 道。',true);return}
- if(!confirm('共识别 '+items.length+' 道；去重后导入 '+unique.length+' 道草稿。\\n与现有题库重复 '+skippedExisting+' 道，文件内部重复 '+skippedFile+' 道。\\n确认导入？'))return;
+ if(!confirm('共识别 '+items.length+' 道；去重后导入 '+unique.length+' 道草稿。\n与现有题库重复 '+skippedExisting+' 道，文件内部重复 '+skippedFile+' 道。\n确认导入？'))return;
  let count=0;for(let i=0;i<unique.length;i+=100){const {error}=await db.from('questions').insert(unique.slice(i,i+100));if(error)throw Error('已导入 '+count+' 道，随后失败：'+error.message);count+=Math.min(100,unique.length-i)}
  await load();msg('成功导入 '+count+' 道草稿；跳过已有重复 '+skippedExisting+' 道、文件内部重复 '+skippedFile+' 道。')
  }catch(e){msg('导入失败：'+e.message,true)}}
