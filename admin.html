@@ -20,7 +20,7 @@ function readOrderTexts(s){const m=String(s||'').match(ORDER_META_RE);if(!m)retu
 function starSlotText(stem){const tokens=String(stem||'').match(/★|☆|[＿_]+/g)||[];return tokens.length===4&&tokens.filter(t=>t==='★'||t==='☆').length===1?tokens.findIndex(t=>t==='★'||t==='☆'):-1}
 function parseOrderSpec(spec,choices){
  let order;
- if(Array.isArray(spec))order=spec.map(v=>typeof v==='string'&&!/^[0-3]$/.test(v)?choices.indexOf(v):Number(v));
+ if(Array.isArray(spec))order=spec.every(v=>typeof v==='number')?spec.slice():spec.map(v=>choices.indexOf(v));
  else if(typeof spec==='string')order=spec.trim().toUpperCase().split(/[\s,，、→>－-]+/).filter(Boolean).map(v=>/^[ABCD]$/.test(v)?v.charCodeAt(0)-65:-1);
  if(!order||order.length!==4||order.some(v=>!Number.isInteger(v)||v<0||v>3)||new Set(order).size!==4)throw Error('完整排序必须是四个不同选项，例如 B-D-A-C');
  return order;
