@@ -3,7 +3,7 @@
 <section class="card"><h2>题库概览</h2><div id="stats"></div><div class="row"><button onclick="load()">刷新题库</button><button class="secondary" onclick="downloadJSON()">导出当前题库 JSON</button></div></section>
 <section class="card"><h2 id="editTitle">新增题目</h2><div class="grid"><div><label>类别</label><select id="category"><option value="vocab">文字・語彙</option><option value="grammar">文法</option><option value="reading">読解</option></select></div><div><label>题型</label><input id="subtype" placeholder="如 文法形式判断"></div></div><label>日语题干（阅读题可包含完整文章）</label><textarea id="stem"></textarea><div class="grid" id="choices"></div><div class="grid"><div><label>正确选项</label><select id="answer"><option value="0">A</option><option value="1">B</option><option value="2">C</option><option value="3">D</option></select></div><div><label>难度 1–5</label><select id="difficulty"><option>1</option><option>2</option><option selected>3</option><option>4</option><option>5</option></select></div></div><label>中文解析</label><textarea id="explanation"></textarea><label>审核状态</label><select id="status"><option value="draft">待审核（不向普通用户显示）</option><option value="approved">审核通过</option><option value="rejected">驳回</option></select><div class="row" style="margin-top:15px"><button onclick="saveQuestion()">保存题目</button><button class="secondary" onclick="clearForm()">取消编辑</button></div></section>
 <section class="card"><h2>批量导入</h2><p>支持 JSON、TXT（即使 iPad 把 JSON 保存成 .txt 也能识别）。TXT 还可使用“类别/题干/A/B/C/D/答案/解析”文本模板，题目之间用 --- 分隔。导入后统一为待审核。</p><input type="file" id="jsonFile" accept=".json,.txt,application/json,text/plain"><details><summary>查看 TXT 录题模板</summary><pre style="white-space:pre-wrap">类别：文法\n题型：文法形式判断\n题干：十分準備した（　）、失敗した。\nA：からには\nB：ものの\nC：ばかりに\nD：とあって\n答案：B\n解析：虽然做好了准备，但仍失败。\n难度：4\n---\n下一道题……</pre></details><div class="row" style="margin-top:12px"><button onclick="importJSON()">导入为待审核</button></div></section>
-<section class="card"><h2>题目列表</h2><div class="row"><input id="search" placeholder="搜索题干或解析" oninput="draw()"><select id="filter" onchange="draw()"><option value="all">全部状态</option><option value="draft">待审核</option><option value="approved">已通过</option><option value="rejected">已驳回</option></select></div><div id="list"></div></section></div></main>
+<section class="card"><h2>题目列表</h2><div class="row"><input id="search" placeholder="搜索题干或解析" oninput="draw()"><select id="filter" onchange="draw()"><option value="all">全部状态</option><option value="draft">待审核</option><option value="approved">已通过</option><option value="rejected">已驳回</option></select><label style="margin:0"><input type="checkbox" id="duplicatesOnly" onchange="draw()" style="width:auto"> 只看重复题</label><button class="secondary" onclick="removeDraftDuplicates()">清理待审核重复题</button></div><div id="duplicateSummary" class="muted"></div><div id="list"></div></section></div></main>
 <script>
 function loadSupabaseSDK(){return new Promise((resolve,reject)=>{if(window.supabase?.createClient)return resolve();const script=document.createElement('script');script.src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js';script.onload=()=>window.supabase?.createClient?resolve():reject(Error('Supabase SDK 未初始化'));script.onerror=()=>reject(Error('无法加载 Supabase SDK（CDN 网络连接失败）'));document.head.appendChild(script);setTimeout(()=>reject(Error('Supabase SDK 加载超过 10 秒，请检查网络或更换网络环境')),10000)})}
 </script><script>
@@ -19,7 +19,33 @@ function normalizeStem(s){return String(s||'').normalize('NFKC').toLowerCase().r
 function duplicateKey(q){return q.category+'|'+normalizeStem(q.stem)}
 function duplicateOf(q,existing){const key=duplicateKey(q);return existing.find(r=>duplicateKey(r)===key)}
 async function load(){msg('正在加载题库…');let all=[];for(let from=0;;from+=1000){let {data,error}=await db.from('questions').select('*').order('id',{ascending:false}).range(from,from+999);if(error){msg('读取失败：'+error.message,true);return}all.push(...data);if(data.length<1000)break}rows=all;msg('已加载 '+rows.length+' 道题');draw()}
-function draw(){const counts={draft:0,approved:0,rejected:0};for(const r of rows)counts[r.status]=(counts[r.status]||0)+1;$('stats').textContent='共 '+rows.length+' 道 · 已通过 '+counts.approved+' · 待审核 '+counts.draft+' · 驳回 '+counts.rejected;const q=$('search').value.trim().toLowerCase(),f=$('filter').value;const selected=rows.filter(r=>(f==='all'||r.status===f)&&(!q||(r.stem+' '+r.explanation).toLowerCase().includes(q)));$('list').innerHTML=selected.slice(0,150).map(r=>'<div class="item"><div><strong>#'+r.id+' · '+esc(r.subtype)+'</strong> <span class="muted">'+esc(r.category)+' · '+esc(r.status)+'</span></div><p>'+esc(r.stem.slice(0,160))+'</p><div class="row"><button class="secondary" onclick="edit('+r.id+')">编辑</button><button class="secondary" onclick="approve('+r.id+')">'+(r.status==='approved'?'转待审核':'审核通过')+'</button><button class="danger" onclick="removeQuestion('+r.id+')">删除</button></div></div>').join('')+(selected.length>150?'<p class="muted">仅显示前 150 道，请使用搜索缩小范围。</p>':'')}
+function duplicateGroups(){
+ const map=new Map();for(const r of rows){const key=duplicateKey(r);if(!map.has(key))map.set(key,[]);map.get(key).push(r)}
+ return [...map.values()].filter(g=>g.length>1);
+}
+function duplicateIdSet(){return new Set(duplicateGroups().flatMap(g=>g.map(r=>r.id)))}
+function draw(){
+ const counts={draft:0,approved:0,rejected:0};for(const r of rows)counts[r.status]=(counts[r.status]||0)+1;
+ const groups=duplicateGroups(),dupes=new Set(groups.flatMap(g=>g.map(r=>r.id)));
+ $('stats').textContent='共 '+rows.length+' 道 · 已通过 '+counts.approved+' · 待审核 '+counts.draft+' · 驳回 '+counts.rejected;
+ $('duplicateSummary').textContent='检测到 '+groups.length+' 组重复题（'+dupes.size+' 道涉及重复）；按同类别及规范化题干匹配，不会自动删除已发布题。';
+ const q=$('search').value.trim().toLowerCase(),f=$('filter').value,only=$('duplicatesOnly').checked;
+ const selected=rows.filter(r=>(f==='all'||r.status===f)&&(!only||dupes.has(r.id))&&(!q||(r.stem+' '+r.explanation).toLowerCase().includes(q)));
+ $('list').innerHTML=selected.slice(0,150).map(r=>'<div class="item"><div><strong>#'+r.id+' · '+esc(r.subtype)+'</strong> <span class="muted">'+esc(r.category)+' · '+esc(r.status)+(dupes.has(r.id)?' · ⚠ 疑似重复':'')+'</span></div><p>'+esc(r.stem.slice(0,160))+'</p><div class="row"><button class="secondary" onclick="edit('+r.id+')">编辑</button><button class="secondary" onclick="approve('+r.id+')">'+(r.status==='approved'?'转待审核':'审核通过')+'</button><button class="danger" onclick="removeQuestion('+r.id+')">删除</button></div></div>').join('')+(selected.length>150?'<p class="muted">仅显示前 150 道，请使用搜索缩小范围。</p>':'');
+}
+async function removeDraftDuplicates(){
+ const targets=[];
+ for(const group of duplicateGroups()){
+  const approved=group.filter(r=>r.status==='approved');
+  const drafts=group.filter(r=>r.status==='draft').sort((a,b)=>a.id-b.id);
+  if(approved.length)targets.push(...drafts);
+  else targets.push(...drafts.slice(1));
+ }
+ if(!targets.length){msg('没有可自动清理的待审核重复题。');return}
+ if(!confirm('将永久删除 '+targets.length+' 道重复草稿。每组至少保留一题；已通过题目绝不删除。确定继续吗？'))return;
+ let deleted=0;for(const r of targets){const {error}=await db.from('questions').delete().eq('id',r.id).eq('status','draft');if(error){msg('已删除 '+deleted+' 道，随后失败：'+error.message,true);await load();return}deleted++}
+ await load();msg('已清理 '+deleted+' 道重复草稿；已发布题目未删除。');
+}
 function clearForm(){editing=null;$('editTitle').textContent='新增题目';for(const id of ['stem','subtype','explanation'])$(id).value='';for(let i=0;i<4;i++)$('choice'+i).value='';$('category').value='vocab';$('answer').value='0';$('difficulty').value='3';$('status').value='draft'}
 function edit(id){const r=rows.find(x=>x.id===id);if(!r)return;editing=id;$('editTitle').textContent='编辑 #'+id;for(const k of ['category','subtype','stem','explanation','difficulty','status'])$(k).value=r[k];$('answer').value=r.answer_index;for(let i=0;i<4;i++)$('choice'+i).value=r.choices[i];window.scrollTo({top:280,behavior:'smooth'})}
 async function saveQuestion(){try{const x=clean({category:$('category').value,subtype:$('subtype').value,stem:$('stem').value,choices:[0,1,2,3].map(i=>$('choice'+i).value),answer_index:Number($('answer').value),difficulty:Number($('difficulty').value),explanation:$('explanation').value,status:$('status').value});const match=duplicateOf(x,rows.filter(r=>r.id!==editing));if(match&&!confirm('发现疑似重复题目 #'+match.id+'（同类别、题干规范化后相同）。仍要保存吗？')){msg('已取消保存：疑似重复 #'+match.id,true);return}const res=editing?await db.from('questions').update(x).eq('id',editing):await db.from('questions').insert(x);if(res.error)throw res.error;clearForm();await load();msg('保存成功')}catch(e){msg('保存失败：'+e.message,true)}}
