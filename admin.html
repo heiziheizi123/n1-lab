@@ -3,7 +3,7 @@
 <section class="card"><h2>题库概览</h2><div id="stats"></div><div class="row"><button onclick="load()">刷新题库</button><button class="secondary" onclick="downloadJSON()">导出当前题库 JSON</button></div></section>
 <section class="card"><h2 id="editTitle">新增题目</h2><div class="grid"><div><label>类别</label><select id="category"><option value="vocab">文字・語彙</option><option value="grammar">文法</option><option value="reading">読解</option></select></div><div><label>题型</label><input id="subtype" placeholder="如 文法形式判断"></div></div><label>日语题干（阅读题可包含完整文章）</label><textarea id="stem"></textarea><div class="grid" id="choices"></div><div class="grid"><div><label>正确选项</label><select id="answer"><option value="0">A</option><option value="1">B</option><option value="2">C</option><option value="3">D</option></select></div><div><label>难度 1–5</label><select id="difficulty"><option>1</option><option>2</option><option selected>3</option><option>4</option><option>5</option></select></div></div><label>中文解析</label><textarea id="explanation"></textarea><label>审核状态</label><select id="status"><option value="draft">待审核（不向普通用户显示）</option><option value="approved">审核通过</option><option value="rejected">驳回</option></select><div class="row" style="margin-top:15px"><button onclick="saveQuestion()">保存题目</button><button class="secondary" onclick="clearForm()">取消编辑</button></div></section>
 <section class="card"><h2>批量导入</h2><p>支持 JSON、TXT（即使 iPad 把 JSON 保存成 .txt 也能识别）。TXT 还可使用“类别/题干/A/B/C/D/答案/解析”文本模板，题目之间用 --- 分隔。导入后统一为待审核。</p><input type="file" id="jsonFile" accept=".json,.txt,application/json,text/plain"><details><summary>查看 TXT 录题模板</summary><pre style="white-space:pre-wrap">类别：文法\n题型：文法形式判断\n题干：十分準備した（　）、失敗した。\nA：からには\nB：ものの\nC：ばかりに\nD：とあって\n答案：B\n解析：虽然做好了准备，但仍失败。\n难度：4\n---\n下一道题……</pre></details><div class="row" style="margin-top:12px"><button onclick="importJSON()">导入为待审核</button></div></section>
-<section class="card"><h2>题目列表</h2><div class="row"><input id="search" placeholder="搜索题干或解析" oninput="draw()"><select id="filter" onchange="draw()"><option value="all">全部状态</option><option value="draft">待审核</option><option value="approved">已通过</option><option value="rejected">已驳回</option></select><label style="margin:0"><input type="checkbox" id="duplicatesOnly" onchange="draw()" style="width:auto"> 只看重复题</label><button class="secondary" onclick="removeDraftDuplicates()">清理待审核重复题</button></div><div id="duplicateSummary" class="muted"></div><div id="list"></div></section></div></main>
+<section class="card"><h2>题目列表</h2><div class="row"><input id="search" placeholder="搜索题干或解析" oninput="draw()"><select id="filter" onchange="draw()"><option value="all">全部状态</option><option value="draft">待审核</option><option value="approved">已通过</option><option value="rejected">已驳回</option></select><label style="margin:0"><input type="checkbox" id="duplicatesOnly" onchange="draw()" style="width:auto"> 只看重复题</label><button class="secondary" onclick="removeDraftDuplicates()">清理待审核重复题</button><button onclick="approveAllDrafts()">一键通过待审核题</button></div><div id="duplicateSummary" class="muted"></div><div id="list"></div></section></div></main>
 <script>
 function loadSupabaseSDK(){return new Promise((resolve,reject)=>{if(window.supabase?.createClient)return resolve();const script=document.createElement('script');script.src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js';script.onload=()=>window.supabase?.createClient?resolve():reject(Error('Supabase SDK 未初始化'));script.onerror=()=>reject(Error('无法加载 Supabase SDK（CDN 网络连接失败）'));document.head.appendChild(script);setTimeout(()=>reject(Error('Supabase SDK 加载超过 10 秒，请检查网络或更换网络环境')),10000)})}
 </script><script>
@@ -32,6 +32,24 @@ function draw(){
  const q=$('search').value.trim().toLowerCase(),f=$('filter').value,only=$('duplicatesOnly').checked;
  const selected=rows.filter(r=>(f==='all'||r.status===f)&&(!only||dupes.has(r.id))&&(!q||(r.stem+' '+r.explanation).toLowerCase().includes(q)));
  $('list').innerHTML=selected.slice(0,150).map(r=>'<div class="item"><div><strong>#'+r.id+' · '+esc(r.subtype)+'</strong> <span class="muted">'+esc(r.category)+' · '+esc(r.status)+(dupes.has(r.id)?' · ⚠ 疑似重复':'')+'</span></div><p>'+esc(r.stem.slice(0,160))+'</p><div class="row"><button class="secondary" onclick="edit('+r.id+')">编辑</button><button class="secondary" onclick="approve('+r.id+')">'+(r.status==='approved'?'转待审核':'审核通过')+'</button><button class="danger" onclick="removeQuestion('+r.id+')">删除</button></div></div>').join('')+(selected.length>150?'<p class="muted">仅显示前 150 道，请使用搜索缩小范围。</p>':'');
+}
+async function approveAllDrafts(){
+ const drafts=rows.filter(r=>r.status==='draft');
+ if(!drafts.length){msg('当前没有待审核题目。');return}
+ const groups=duplicateGroups(),duplicateIds=new Set(groups.flatMap(g=>g.map(r=>r.id)));
+ // Protect existing approved questions and leave ambiguous duplicates for manual review.
+ const eligible=drafts.filter(r=>!duplicateIds.has(r.id));
+ const skipped=drafts.length-eligible.length;
+ if(!eligible.length){msg('所有待审核题都涉及疑似重复，请先检查或清理重复题。',true);return}
+ if(!confirm('准备一次通过 '+eligible.length+' 道待审核题。\\n另有 '+skipped+' 道疑似重复题将保留待审核。\\n请确认题目答案已人工核对；通过后学生即可看到。继续吗？'))return;
+ let done=0;
+ for(let i=0;i<eligible.length;i+=100){
+  const ids=eligible.slice(i,i+100).map(r=>r.id);
+  const {error}=await db.from('questions').update({status:'approved'}).in('id',ids).eq('status','draft');
+  if(error){await load();msg('已提交 '+done+' 道，后续失败：'+error.message,true);return}
+  done+=ids.length;
+ }
+ await load();msg('批量审核完成：提交 '+done+' 道；保留疑似重复 '+skipped+' 道待审核。');
 }
 async function removeDraftDuplicates(){
  const targets=[];
