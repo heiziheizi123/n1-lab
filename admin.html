@@ -64,10 +64,15 @@ async function rebalanceAnswerPositions(){
 }
 function normalizeStem(s){return String(s||'').normalize('NFKC').toLowerCase().replace(/[\s\u3000、。，．,.!?！？「」『』【】（）()：:；;・]/g,'')}
 function duplicateKey(q){return q.category+'|'+normalizeStem(q.stem)}
+function exactDuplicateKey(q){const choices=Array.isArray(q.choices)?q.choices:[];const correct=choices[q.answer_index];return duplicateKey(q)+'|'+choices.map(normalizeStem).sort().join('|')+'|'+normalizeStem(correct)}
 function duplicateOf(q,existing){const key=duplicateKey(q);return existing.find(r=>duplicateKey(r)===key)}
 async function load(){msg('正在加载题库…');let all=[];for(let from=0;;from+=1000){let {data,error}=await db.from('questions').select('*').order('id',{ascending:false}).range(from,from+999);if(error){msg('读取失败：'+error.message,true);return}all.push(...data);if(data.length<1000)break}rows=all;msg('已加载 '+rows.length+' 道题');draw()}
 function duplicateGroups(){
  const map=new Map();for(const r of rows){const key=duplicateKey(r);if(!map.has(key))map.set(key,[]);map.get(key).push(r)}
+ return [...map.values()].filter(g=>g.length>1);
+}
+function exactDuplicateGroups(){
+ const map=new Map();for(const r of rows){const key=exactDuplicateKey(r);if(!map.has(key))map.set(key,[]);map.get(key).push(r)}
  return [...map.values()].filter(g=>g.length>1);
 }
 function duplicateIdSet(){return new Set(duplicateGroups().flatMap(g=>g.map(r=>r.id)))}
@@ -75,7 +80,7 @@ function draw(){
  const counts={draft:0,approved:0,rejected:0};for(const r of rows)counts[r.status]=(counts[r.status]||0)+1;
  const groups=duplicateGroups(),dupes=new Set(groups.flatMap(g=>g.map(r=>r.id)));
  $('stats').textContent='共 '+rows.length+' 道 · 已通过 '+counts.approved+' · 待审核 '+counts.draft+' · 驳回 '+counts.rejected;
- $('duplicateSummary').textContent='检测到 '+groups.length+' 组重复题（'+dupes.size+' 道涉及重复）；按同类别及规范化题干匹配，不会自动删除已发布题。';
+ $('duplicateSummary').textContent='检测到 '+groups.length+' 组疑似重复（'+dupes.size+' 道）；其中 '+exactDuplicateGroups().length+' 组的题干、选项及答案均一致，可安全清理重复草稿。';
  const q=$('search').value.trim().toLowerCase(),f=$('filter').value,only=$('duplicatesOnly').checked;
  const selected=rows.filter(r=>(f==='all'||r.status===f)&&(!only||dupes.has(r.id))&&(!q||(r.stem+' '+r.explanation).toLowerCase().includes(q)));
  $('list').innerHTML=selected.slice(0,150).map(r=>'<div class="item"><div><strong>#'+r.id+' · '+esc(r.subtype)+'</strong> <span class="muted">'+esc(r.category)+' · '+esc(r.status)+(dupes.has(r.id)?' · ⚠ 疑似重复':'')+'</span></div><p>'+esc(r.stem.slice(0,160))+'</p><div class="row"><button class="secondary" onclick="edit('+r.id+')">编辑</button><button class="secondary" onclick="approve('+r.id+')">'+(r.status==='approved'?'转待审核':'审核通过')+'</button><button class="danger" onclick="removeQuestion('+r.id+')">删除</button></div></div>').join('')+(selected.length>150?'<p class="muted">仅显示前 150 道，请使用搜索缩小范围。</p>':'');
@@ -102,14 +107,14 @@ async function approveAllDrafts(){
 }
 async function removeDraftDuplicates(){
  const targets=[];
- for(const group of duplicateGroups()){
+ for(const group of exactDuplicateGroups()){
   const approved=group.filter(r=>r.status==='approved');
   const drafts=group.filter(r=>r.status==='draft').sort((a,b)=>a.id-b.id);
   if(approved.length)targets.push(...drafts);
   else targets.push(...drafts.slice(1));
  }
  if(!targets.length){msg('没有可自动清理的待审核重复题。');return}
- if(!confirm('将永久删除 '+targets.length+' 道重复草稿。每组至少保留一题；已通过题目绝不删除。确定继续吗？'))return;
+ if(!confirm('将永久删除 '+targets.length+' 道题干、选项和正确答案均一致的重复草稿。每组至少保留一题；已通过题目绝不删除。确定继续吗？'))return;
  let deleted=0;for(const r of targets){const {error}=await db.from('questions').delete().eq('id',r.id).eq('status','draft');if(error){msg('已删除 '+deleted+' 道，随后失败：'+error.message,true);await load();return}deleted++}
  await load();msg('已清理 '+deleted+' 道重复草稿；已发布题目未删除。');
 }
@@ -138,9 +143,9 @@ async function importJSON(){try{
  const parsed=parseImportText(await file.text());if(!Array.isArray(parsed)||!parsed.length)throw Error('文件中没有识别到题目');
  const prepared=parsed.map(x=>clean({...x,status:'draft'}));const targets=balancedTargets(prepared.length);const items=prepared.map((x,i)=>moveAnswerTo(x,targets[i]));
  // Read the latest database snapshot, not only the last displayed list.
- const existing=[];for(let from=0;;from+=500){const {data,error}=await db.from('questions').select('id,category,stem').order('id',{ascending:true}).range(from,from+499);if(error)throw Error('去重检查读取题库失败：'+error.message);existing.push(...(data||[]));if(!data||data.length<500)break}
- const existingKeys=new Set(existing.map(duplicateKey)),seen=new Set(existingKeys),unique=[];let skippedExisting=0,skippedFile=0;
- for(const item of items){const key=duplicateKey(item);if(seen.has(key)){if(existingKeys.has(key))skippedExisting++;else skippedFile++;continue}seen.add(key);unique.push(item)}
+ const existing=[];for(let from=0;;from+=500){const {data,error}=await db.from('questions') .select('id,category,stem,choices,answer_index').order('id',{ascending:true}).range(from,from+499);if(error)throw Error('去重检查读取题库失败：'+error.message);existing.push(...(data||[]));if(!data||data.length<500)break}
+ const existingKeys=new Set(existing.map(exactDuplicateKey)),seen=new Set(existingKeys),unique=[];let skippedExisting=0,skippedFile=0;
+ for(const item of items){const key=exactDuplicateKey(item);if(seen.has(key)){if(existingKeys.has(key))skippedExisting++;else skippedFile++;continue}seen.add(key);unique.push(item)}
  if(!unique.length){msg('没有可导入的新题目：与题库重复 '+skippedExisting+' 道，文件内部重复 '+skippedFile+' 道。',true);return}
  if(!confirm('共识别 '+items.length+' 道；去重后导入 '+unique.length+' 道草稿。\n与现有题库重复 '+skippedExisting+' 道，文件内部重复 '+skippedFile+' 道。\n确认导入？'))return;
  let count=0;for(let i=0;i<unique.length;i+=100){const {error}=await db.from('questions').insert(unique.slice(i,i+100));if(error)throw Error('已导入 '+count+' 道，随后失败：'+error.message);count+=Math.min(100,unique.length-i)}
