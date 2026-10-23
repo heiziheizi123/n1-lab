@@ -74,9 +74,16 @@ if(!client){document.getElementById('n1-error').textContent='连接组件加载�
 async function enter(user){
 uid=user.id;
 const {data,error}=await client.from('study_data').select('payload').eq('user_id',uid).maybeSingle();
-const {data:questionRows,error:questionError}=await client.from('questions').select('id,category,subtype,stem,choices,answer_index,explanation').eq('status','approved').order('id',{ascending:true}).limit(1000);
-if(!questionError && questionRows) addCloudQuestions(questionRows);
-const cloudMessage=questionError?'云端题库读取失败：'+questionError.message:`云端题目 ${cloudQuestionIds.size} 道`;
+let questionError=null,questionRows=[];
+for(let from=0;from<10000;from+=500){
+ const {data:batch,error:batchError}=await client.from('questions').select('id,category,subtype,stem,choices,answer_index,explanation').eq('status','approved').order('id',{ascending:true}).range(from,from+499);
+ if(batchError){questionError=batchError;break}
+ if(!batch?.length)break;
+ questionRows.push(...batch);
+ if(batch.length<500)break;
+}
+if(questionRows.length)addCloudQuestions(questionRows);
+const cloudMessage=questionError?'云端题库读取失败（已加载 '+cloudQuestionIds.size+' 道）：'+questionError.message:`云端题目 ${cloudQuestionIds.size} 道`;
 
 if(error){document.getElementById('n1-error').textContent='数据库尚未配置：请先运行 supabase-setup.sql';return}
 if(data?.payload && Array.isArray(data.payload.history)){state={...initial,...data.payload}}
