@@ -25,9 +25,9 @@ function parseImportText(text){
  let value;try{value=JSON.parse(text)}catch{}
  if(Array.isArray(value))return value;
  if(value&&Array.isArray(value.questions))return value.questions;
- const blocks=text.replace(/\\r/g,'').split(/^\\s*---+\\s*$/m).map(x=>x.trim()).filter(Boolean);
+ const blocks=text.replace(/\r/g,'').split(/^\s*---+\s*$/m).map(x=>x.trim()).filter(Boolean);
  return blocks.map((block,i)=>{
-  const fields={};for(const line of block.split('\\n')){const m=line.match(/^\\s*(类别|题型|题干|A|B|C|D|答案|解析|难度|category|subtype|stem|answer|explanation|difficulty)\\s*[:：]\\s*(.*)$/i);if(m)fields[m[1].toLowerCase()]=m[2].trim()}
+  const fields={};for(const line of block.split('\n')){const m=line.match(/^\s*(类别|题型|题干|A|B|C|D|答案|解析|难度|category|subtype|stem|answer|explanation|difficulty)\s*[:：]\s*(.*)$/i);if(m)fields[m[1].toLowerCase()]=m[2].trim()}
   const category=fields['类别']||fields.category||'';
   const type=category==='文法'?'grammar':category==='読解'||category==='阅读'?'reading':category==='語彙'||category==='文字・語彙'||category==='词汇'?'vocab':category;
   const rawAnswer=(fields['答案']||fields.answer||'').toUpperCase();
