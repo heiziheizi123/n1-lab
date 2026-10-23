@@ -3,7 +3,7 @@
 <section class="card"><h2>题库概览</h2><div id="stats"></div><div class="row"><button onclick="load()">刷新题库</button><button class="secondary" onclick="downloadJSON()">导出当前题库 JSON</button></div></section>
 <section class="card"><h2 id="editTitle">新增题目</h2><div class="grid"><div><label>类别</label><select id="category"><option value="vocab">文字・語彙</option><option value="grammar">文法</option><option value="reading">読解</option></select></div><div><label>题型</label><input id="subtype" placeholder="如 文法形式判断"></div></div><label>日语题干（阅读题可包含完整文章）</label><textarea id="stem"></textarea><div class="grid" id="choices"></div><div class="grid"><div><label>正确选项</label><select id="answer"><option value="0">A</option><option value="1">B</option><option value="2">C</option><option value="3">D</option></select></div><div><label>难度 1–5</label><select id="difficulty"><option>1</option><option>2</option><option selected>3</option><option>4</option><option>5</option></select></div></div><label>中文解析</label><textarea id="explanation"></textarea><label>审核状态</label><select id="status"><option value="draft">待审核（不向普通用户显示）</option><option value="approved">审核通过</option><option value="rejected">驳回</option></select><div class="row" style="margin-top:15px"><button onclick="saveQuestion()">保存题目</button><button class="secondary" onclick="clearForm()">取消编辑</button></div></section>
 <section class="card"><h2>批量导入</h2><p>支持 JSON、TXT（即使 iPad 把 JSON 保存成 .txt 也能识别）。TXT 还可使用“类别/题干/A/B/C/D/答案/解析”文本模板，题目之间用 --- 分隔。导入后统一为待审核。</p><input type="file" id="jsonFile" accept=".json,.txt,application/json,text/plain"><details><summary>查看 TXT 录题模板</summary><pre style="white-space:pre-wrap">类别：文法\n题型：文法形式判断\n题干：十分準備した（　）、失敗した。\nA：からには\nB：ものの\nC：ばかりに\nD：とあって\n答案：B\n解析：虽然做好了准备，但仍失败。\n难度：4\n---\n下一道题……</pre></details><div class="row" style="margin-top:12px"><button onclick="importJSON()">导入为待审核</button></div></section>
-<section class="card"><h2>题目列表</h2><div class="row"><input id="search" placeholder="搜索题干或解析" oninput="draw()"><select id="filter" onchange="draw()"><option value="all">全部状态</option><option value="draft">待审核</option><option value="approved">已通过</option><option value="rejected">已驳回</option></select><label style="margin:0"><input type="checkbox" id="duplicatesOnly" onchange="draw()" style="width:auto"> 只看重复题</label><button class="secondary" onclick="removeDraftDuplicates()">清理待审核重复题</button><button onclick="approveAllDrafts()">一键通过待审核题</button></div><div id="duplicateSummary" class="muted"></div><div id="list"></div></section></div></main>
+<section class="card"><h2>题目列表</h2><div class="row"><input id="search" placeholder="搜索题干或解析" oninput="draw()"><select id="filter" onchange="draw()"><option value="all">全部状态</option><option value="draft">待审核</option><option value="approved">已通过</option><option value="rejected">已驳回</option></select><label style="margin:0"><input type="checkbox" id="duplicatesOnly" onchange="draw()" style="width:auto"> 只看重复题</label><button class="secondary" onclick="removeDraftDuplicates()">清理待审核重复题</button><button onclick="approveAllDrafts()">一键通过待审核题</button><button class="secondary" onclick="rebalanceAnswerPositions()">均衡现有题目答案位置</button></div><div id="duplicateSummary" class="muted"></div><div id="list"></div></section></div></main>
 <script>
 function loadSupabaseSDK(){return new Promise((resolve,reject)=>{if(window.supabase?.createClient)return resolve();const script=document.createElement('script');script.src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js';script.onload=()=>window.supabase?.createClient?resolve():reject(Error('Supabase SDK 未初始化'));script.onerror=()=>reject(Error('无法加载 Supabase SDK（CDN 网络连接失败）'));document.head.appendChild(script);setTimeout(()=>reject(Error('Supabase SDK 加载超过 10 秒，请检查网络或更换网络环境')),10000)})}
 </script><script>
@@ -15,6 +15,25 @@ function msg(s,bad=false){$('notice').textContent=s;$('notice').className='statu
 for(let i=0;i<4;i++){$('choices').insertAdjacentHTML('beforeend','<div><label>选项 '+String.fromCharCode(65+i)+'</label><input id="choice'+i+'"></div>')}
 function clean(x){if(!x||!['vocab','grammar','reading'].includes(x.category)||typeof x.stem!=='string'||!x.stem.trim()||!Array.isArray(x.choices)||x.choices.length!==4||x.choices.some(v=>typeof v!=='string'||!v.trim())||!Number.isInteger(x.answer_index)||x.answer_index<0||x.answer_index>3)throw Error('题目格式不正确：请检查类别、题干、四个选项及答案编号');return {category:x.category,subtype:String(x.subtype||'general'),stem:x.stem.trim(),choices:x.choices,answer_index:x.answer_index,explanation:String(x.explanation||''),difficulty:Math.max(1,Math.min(5,Number(x.difficulty)||3)),status:x.status||'draft'}}
 // Ignore whitespace and common punctuation differences, while keeping kana/kanji intact.
+function moveAnswerTo(q,target){
+ const source=q.answer_index;if(source===target)return {...q,choices:[...q.choices]};
+ const choices=[...q.choices],correct=choices.splice(source,1)[0];choices.splice(target,0,correct);
+ return {...q,choices,answer_index:target};
+}
+function balancedTargets(n){
+ const positions=Array.from({length:n},(_,i)=>i%4);
+ for(let i=positions.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[positions[i],positions[j]]=[positions[j],positions[i]]}
+ return positions;
+}
+async function rebalanceAnswerPositions(){
+ const candidates=rows.filter(r=>r.status!=='rejected'&&Array.isArray(r.choices)&&r.choices.length===4&&Number.isInteger(r.answer_index)&&r.answer_index>=0&&r.answer_index<4);
+ if(!candidates.length){msg('没有可调整的题目。');return}
+ const targets=balancedTargets(candidates.length),updates=candidates.map((r,i)=>({original:r,changed:moveAnswerTo(r,targets[i])})).filter(x=>x.original.answer_index!==x.changed.answer_index);
+ if(!updates.length){msg('当前答案位置已经均衡，无需修改。');return}
+ if(!confirm('将调整 '+updates.length+' 道题目的选项顺序（共检查 '+candidates.length+' 道）。\\n正确答案内容不变，仅同步修改选项顺序和答案编号；包括已发布题目。\\n确定执行吗？'))return;
+ let done=0;for(const x of updates){const {error}=await db.from('questions').update({choices:x.changed.choices,answer_index:x.changed.answer_index}).eq('id',x.original.id);if(error){await load();msg('已调整 '+done+' 道，后续失败：'+error.message,true);return}done++}
+ await load();msg('答案位置均衡完成：调整 '+done+' 道；正确答案内容保持不变。');
+}
 function normalizeStem(s){return String(s||'').normalize('NFKC').toLowerCase().replace(/[\s\u3000、。，．,.!?！？「」『』【】（）()：:；;・]/g,'')}
 function duplicateKey(q){return q.category+'|'+normalizeStem(q.stem)}
 function duplicateOf(q,existing){const key=duplicateKey(q);return existing.find(r=>duplicateKey(r)===key)}
@@ -87,7 +106,7 @@ function parseImportText(text){
 async function importJSON(){try{
  const file=$('jsonFile').files[0];if(!file)throw Error('请选择 JSON 或 TXT 文件');
  const parsed=parseImportText(await file.text());if(!Array.isArray(parsed)||!parsed.length)throw Error('文件中没有识别到题目');
- const items=parsed.map(x=>clean({...x,status:'draft'}));
+ const prepared=parsed.map(x=>clean({...x,status:'draft'}));const targets=balancedTargets(prepared.length);const items=prepared.map((x,i)=>moveAnswerTo(x,targets[i]));
  // Read the latest database snapshot, not only the last displayed list.
  const existing=[];for(let from=0;;from+=500){const {data,error}=await db.from('questions').select('id,category,stem').order('id',{ascending:true}).range(from,from+499);if(error)throw Error('去重检查读取题库失败：'+error.message);existing.push(...(data||[]));if(!data||data.length<500)break}
  const existingKeys=new Set(existing.map(duplicateKey)),seen=new Set(existingKeys),unique=[];let skippedExisting=0,skippedFile=0;
