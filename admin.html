@@ -54,11 +54,11 @@ function balancedTargets(n){
  return positions;
 }
 async function rebalanceAnswerPositions(){
- const candidates=rows.filter(r=>r.status!=='rejected'&&Array.isArray(r.choices)&&r.choices.length===4&&Number.isInteger(r.answer_index)&&r.answer_index>=0&&r.answer_index<4);
- if(!candidates.length){msg('没有可调整的题目。');return}
+ const candidates=rows.filter(r=>r.status!=='rejected'&&Array.isArray(r.choices)&&r.choices.length===4&&Number.isInteger(r.answer_index)&&r.answer_index>=0&&r.answer_index<4&&(!isStarOrdering(r)||validOrderMeta(r)));
+ if(!candidates.length){msg('没有可调整的题目（缺少完整排序的★题会被跳过）。');return}
  const targets=balancedTargets(candidates.length),updates=candidates.map((r,i)=>({original:r,changed:moveAnswerTo(r,targets[i])})).filter(x=>x.original.answer_index!==x.changed.answer_index);
  if(!updates.length){msg('当前答案位置已经均衡，无需修改。');return}
- if(!confirm('将调整 '+updates.length+' 道题目的选项顺序（共检查 '+candidates.length+' 道）。\\n正确答案内容不变，仅同步修改选项顺序和答案编号；包括已发布题目。\\n确定执行吗？'))return;
+ if(!confirm('将调整 '+updates.length+' 道题目的选项顺序（共检查 '+candidates.length+' 道；缺少完整排序的★题不会修改）。\\n正确答案内容不变，仅同步修改选项顺序和答案编号；包括已发布题目。\\n确定执行吗？'))return;
  let done=0;for(const x of updates){const {error}=await db.from('questions').update({choices:x.changed.choices,answer_index:x.changed.answer_index}).eq('id',x.original.id);if(error){await load();msg('已调整 '+done+' 道，后续失败：'+error.message,true);return}done++}
  await load();msg('答案位置均衡完成：调整 '+done+' 道；正确答案内容保持不变。');
 }
